@@ -1,8 +1,8 @@
 import { isNil } from 'lodash-es';
 
-export interface CreateStorageParams {
+export interface StorageOptions {
   storage: Storage;
-  prefixKey: string;
+  prefix: string;
 
   /**
    * Expiration time in seconds
@@ -14,45 +14,43 @@ export interface CreateStorageParams {
 
 export interface StorageItem<T = unknown> {
   value: T;
-  time: number;
   expire: number;
 }
 
 export class WebStorage {
   private storage: Storage;
-  private prefixKey: string = '';
+  private prefix: string = '';
   private timeout: number;
 
-  constructor(options: CreateStorageParams) {
-    const { storage, prefixKey, timeout } = options;
+  constructor(options: StorageOptions) {
+    const { storage, prefix, timeout } = options;
     this.storage = storage;
-    this.prefixKey = prefixKey;
+    this.prefix = prefix;
     this.timeout = isNil(timeout) ? 0 : timeout;
   }
 
-  private getKey(key: string) {
-    return `${this.prefixKey}${key}`.toUpperCase();
+  private getFullKey(key: string) {
+    return this.prefix !== '' ? `${this.prefix}-${key}` : key;
   }
 
   /**
    * Set cache
    * @param {string} key
    * @param {*} value
-   * @param {*} expire 参见 {@link CreateStorageParams} 中 timeout 的定义
+   * @param {*} expire 参见 {@link StorageOptions} 中 timeout 的定义
    * @memberof Cache
    */
-  set<T>(key: string, value: T, expire: number = this.timeout) {
+  setItem<T>(key: string, value: T, expire: number = this.timeout) {
     const date = new Date();
     const stringData = JSON.stringify({
       value,
-      time: date.getTime(),
       expire: expire > 0 ? date.getTime() + expire * 1000 : expire,
     } as StorageItem<T>);
-    this.storage.setItem(this.getKey(key), stringData);
+    this.storage.setItem(this.getFullKey(key), stringData);
   }
 
-  get<T = unknown>(key: string) {
-    const val = this.storage.getItem(this.getKey(key));
+  getItem<T = unknown>(key: string) {
+    const val = this.storage.getItem(this.getFullKey(key));
     if (!val) return null;
 
     try {
@@ -61,7 +59,7 @@ export class WebStorage {
       if (expire === 0 || expire >= new Date().getTime()) {
         return value;
       }
-      this.remove(key);
+      this.removeItem(key);
       return null;
     } catch {
       return null;
@@ -72,8 +70,8 @@ export class WebStorage {
    *
    * @param {string} key
    */
-  remove(key: string) {
-    this.storage.removeItem(this.getKey(key));
+  removeItem(key: string) {
+    this.storage.removeItem(this.getFullKey(key));
   }
 
   clear() {
@@ -82,12 +80,12 @@ export class WebStorage {
 }
 
 export function createStorage({
-  prefixKey = '',
+  prefix = '',
   storage = window.sessionStorage,
   timeout = 0,
-}: Partial<CreateStorageParams>) {
+}: Partial<StorageOptions>) {
   return new WebStorage({
-    prefixKey: prefixKey,
+    prefix: prefix,
     storage: storage,
     timeout: timeout,
   });

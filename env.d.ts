@@ -10,6 +10,9 @@ interface ImportMetaEnv {
 
   /** 打包目录 */
   readonly VITE_OUTDIR: string;
+
+  /** 应用命名空间，用于缓存等功能的前缀，确保隔离 */
+  readonly VITE_APP_NAMESPACE: string;
 }
 
 interface ImportMeta {

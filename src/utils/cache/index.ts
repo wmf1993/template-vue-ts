@@ -1,24 +1,26 @@
 import { isNil } from 'lodash-es';
 
-import { DEFAULT_CACHE_TIME } from '@/constants/cache';
+import { DEFAULT_CACHE_TIME, NAMESPACE } from '@/constants/cache';
 
-import type { CreateStorageParams } from './storageCache';
+import type { StorageOptions } from './storageCache';
 import { createStorage as create } from './storageCache';
 
-export const createSessionStorage = (
-  options: Pick<CreateStorageParams, 'prefixKey' | 'timeout'>,
-) => {
+type CreateStorageOptions = Partial<Pick<StorageOptions, 'prefix' | 'timeout'>>;
+
+export const createSessionStorage = (options: CreateStorageOptions) => {
   return create({
     ...options,
     storage: window.sessionStorage,
+    prefix: isNil(options.prefix) ? NAMESPACE : options.prefix,
     timeout: isNil(options.timeout) ? DEFAULT_CACHE_TIME : options.timeout,
   });
 };
 
-export const createLocalStorage = (options: Pick<CreateStorageParams, 'prefixKey' | 'timeout'>) => {
+export const createLocalStorage = (options: CreateStorageOptions) => {
   return create({
     ...options,
     storage: window.localStorage,
+    prefix: isNil(options.prefix) ? NAMESPACE : options.prefix,
     timeout: isNil(options.timeout) ? DEFAULT_CACHE_TIME : options.timeout,
   });
 };
