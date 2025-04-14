@@ -3,5 +3,18 @@
   "semi": true,
   "singleQuote": true,
   "printWidth": 100,
-  "vueIndentScriptAndStyle": true
+  "vueIndentScriptAndStyle": true,
+
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^@types/(.*)$",
+    "^node(.*)$",
+    "^vue(.*)$",
+    "^@?\\w",
+    "<THIRD_PARTY_MODULES>",
+    "^@/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }
